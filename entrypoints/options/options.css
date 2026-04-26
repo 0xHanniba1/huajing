@@ -1,0 +1,13 @@
+body { margin: 0; font: 14px/1.5 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+.hj-options { max-width: 720px; margin: 0 auto; padding: 32px 20px; }
+.hj-options h1 { font-size: 20px; margin: 0 0 16px; }
+.toolbar { display: flex; gap: 8px; margin-bottom: 20px; align-items: center; }
+.toolbar input { flex: 1; height: 32px; padding: 0 10px; border: 1px solid #e6e8eb; border-radius: 6px; }
+.toolbar select { height: 32px; }
+.toolbar .count { color: #6b7280; font-size: 12px; margin-left: auto; }
+.list { list-style: none; padding: 0; margin: 0; }
+.list li { display: grid; grid-template-columns: 160px 1fr 80px 100px 60px; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; align-items: center; }
+.list .word { font-weight: 600; }
+.list .ctx { color: #6b7280; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.list .meta { font-size: 11px; color: #6b7280; display: flex; flex-direction: column; gap: 2px; }
+.empty { padding: 48px; text-align: center; color: #6b7280; border: 1px dashed #e6e8eb; border-radius: 8px; }
