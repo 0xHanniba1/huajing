@@ -11,8 +11,12 @@ const storageData: Record<string, unknown> = {};
         return Object.fromEntries(ks.map((k) => [k, storageData[k]]));
       },
       set: async (items: Record<string, unknown>) => {
+        const changes: Record<string, { oldValue?: unknown; newValue: unknown }> = {};
+        for (const [k, v] of Object.entries(items)) {
+          changes[k] = { oldValue: storageData[k], newValue: v };
+        }
         Object.assign(storageData, items);
-        listeners.forEach((fn) => fn(items, 'local'));
+        listeners.forEach((fn) => fn(changes, 'local'));
       },
       remove: async (keys: string | string[]) => {
         const ks = Array.isArray(keys) ? keys : [keys];
@@ -20,7 +24,13 @@ const storageData: Record<string, unknown> = {};
       },
       clear: async () => { for (const k of Object.keys(storageData)) delete storageData[k]; },
     },
-    onChanged: { addListener: (fn: any) => listeners.push(fn) },
+    onChanged: {
+      addListener: (fn: any) => listeners.push(fn),
+      removeListener: (fn: any) => {
+        const idx = listeners.indexOf(fn);
+        if (idx !== -1) listeners.splice(idx, 1);
+      },
+    },
   },
   runtime: {
     sendMessage: async () => undefined,
