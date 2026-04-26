@@ -12,7 +12,7 @@ export default defineContentScript({
     const tryActivate = async () => {
       if (!settings.enabled) return;
       if (settings.autoSites.includes(location.hostname)) {
-        if (settings.mode === 'bilingual' && !started) { await activate(settings); started = true; }
+        if ((settings.mode === 'bilingual' || settings.mode === 'replace') && !started) { await activate(settings, settings.mode); started = true; }
       }
     };
 
@@ -25,8 +25,8 @@ export default defineContentScript({
         else tryActivate();
       } else if (msg.type === 'cmd-toggle') {
         if (started) { deactivate(); started = false; }
-        else if (settings.mode === 'bilingual') {
-          activate(settings).then(() => { started = true; });
+        else if (settings.mode === 'bilingual' || settings.mode === 'replace') {
+          activate(settings, settings.mode).then(() => { started = true; });
         }
       }
     });
