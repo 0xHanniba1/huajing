@@ -6,7 +6,7 @@ export default defineConfig({
     name: '化境 Huàjìng',
     description: 'Chrome 翻译插件 — 双语对照 / 替换 / 划词查词',
     version: '0.1.0',
-    permissions: ['storage', 'contextMenus', 'activeTab'],
+    permissions: ['storage', 'contextMenus', 'activeTab', 'tabs'],
     host_permissions: ['<all_urls>'],
     commands: {
       'toggle-translate': {
