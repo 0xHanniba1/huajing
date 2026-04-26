@@ -4,3 +4,4 @@ node_modules/
 *.log
 .DS_Store
 assets/ecdict.lemma.json.gz
+public/ecdict.lemma.json.gz
