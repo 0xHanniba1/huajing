@@ -1,5 +1,5 @@
-import { Settings, EngineId, VocabEntry } from '@/store/types';
-import { DictEntry } from '@/dict/types';
+import { Settings, EngineId, VocabEntry } from '../store/types';
+import { DictEntry } from '../dict/types';
 
 export type Msg =
   | { type: 'translate-batch'; texts: string[]; targetLang: string }

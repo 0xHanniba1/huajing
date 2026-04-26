@@ -1,5 +1,5 @@
 import { Engine } from './types';
-import { EngineId } from '@/store/types';
+import { EngineId } from '../store/types';
 import { makeOpenAICompatEngine } from './openai-compat';
 import { anthropicEngine } from './anthropic';
 import { geminiEngine } from './gemini';

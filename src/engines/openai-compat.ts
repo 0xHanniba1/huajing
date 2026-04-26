@@ -1,5 +1,5 @@
 import { Engine, EngineError } from './types';
-import { EngineId } from '@/store/types';
+import { EngineId } from '../store/types';
 import { buildBatchPrompt, parseBatchResponse } from './prompt';
 
 export function makeOpenAICompatEngine(id: EngineId): Engine {

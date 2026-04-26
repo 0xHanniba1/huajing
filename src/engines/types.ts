@@ -1,4 +1,4 @@
-import { EngineId, EngineConfig, TargetLang } from '@/store/types';
+import { EngineId, EngineConfig, TargetLang } from '../store/types';
 
 export type TranslateOpts = {
   targetLang: TargetLang;
