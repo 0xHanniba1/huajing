@@ -1,6 +1,9 @@
-import { getSettings } from '../src/store/storage';
+import { getSettings, patchSettings } from '../src/store/storage';
 import { activate, deactivate, rerender } from '../src/content/coordinator';
 import { Msg } from '../src/messaging/types';
+import { Mode } from '../src/store/types';
+
+const MODE_CYCLE: Mode[] = ['bilingual', 'replace', 'hover'];
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -28,6 +31,9 @@ export default defineContentScript({
         else if (['bilingual','replace','hover'].includes(settings.mode)) {
           activate(settings, settings.mode).then(() => { started = true; });
         }
+      } else if (msg.type === 'cmd-cycle-mode') {
+        const next = MODE_CYCLE[(MODE_CYCLE.indexOf(settings.mode) + 1) % MODE_CYCLE.length];
+        patchSettings({ mode: next });
       }
     });
   },
