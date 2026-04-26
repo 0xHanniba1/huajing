@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<title>化境 Huàjìng — Chrome 翻译插件</title>
+
+<style>/* 译境 Yìjìng — shared styles for the article + extension UI */
+
+:root {
+  --yj-bg: #ffffff;
+  --yj-fg: #1a1a1a;
+  --yj-muted: #6b7280;
+  --yj-line: #e6e8eb;
+  --yj-card: #f6f7f9;
+  --yj-accent: #2b6cb0;        /* deep editorial blue */
+  --yj-accent-soft: #e8f0fb;
+  --yj-translation: #2b6cb0;   /* user-tweakable */
+  --yj-divider-style: solid;   /* solid | dashed | dotted | bracket | none */
+  --yj-translation-size: 15px;
+}
+
+[data-theme="dark"] {
+  --yj-bg: #15171a;
+  --yj-fg: #e7e9ec;
+  --yj-muted: #9aa0a6;
+  --yj-line: #2a2d31;
+  --yj-card: #1c1f23;
+  --yj-accent: #7aa6e8;
+  --yj-accent-soft: #1f2a3a;
+  --yj-translation: #7aa6e8;
+}
+
+* { box-sizing: border-box; }
+
+.yj-page {
+  background: var(--yj-bg);
+  color: var(--yj-fg);
+  font: 15px/1.7 -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue",
+        "Microsoft YaHei", system-ui, sans-serif;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* News article header */
+.yj-article {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 60px 80px;
+  position: relative;
+}
+.yj-article::-webkit-scrollbar { width: 6px; }
+.yj-article::-webkit-scrollbar-thumb {
+  background: var(--yj-line); border-radius: 3px;
+}
+
+.yj-kicker {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--yj-accent);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.yj-title {
+  font-size: 32px;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 12px;
+  color: var(--yj-fg);
+}
+
+.yj-byline {
+  font-size: 12px;
+  color: var(--yj-muted);
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--yj-line);
+}
+.yj-byline .dot {
+  width: 3px; height: 3px; border-radius: 50%;
+  background: var(--yj-muted);
+}
+.yj-author-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.yj-avatar {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: linear-gradient(135deg, #c9d6e8, #8ea3c2);
+}
+
+/* Hero placeholder */
+.yj-hero {
+  height: 180px;
+  border-radius: 8px;
+  margin: 0 0 22px;
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(0,0,0,0.04) 0 8px,
+      rgba(0,0,0,0.02) 8px 16px),
+    var(--yj-card);
+  display: flex; align-items: flex-end; justify-content: flex-start;
+  padding: 12px;
+  font: 11px ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--yj-muted);
+}
+[data-theme="dark"] .yj-hero {
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(255,255,255,0.04) 0 8px,
+      rgba(255,255,255,0.02) 8px 16px),
+    var(--yj-card);
+}
+
+/* Paragraph */
+.yj-p {
+  font-size: 16px;
+  line-height: 1.8;
+  margin: 0 0 16px;
+  color: var(--yj-fg);
+  text-wrap: pretty;
+}
+
+/* Bilingual mode — 译文段 */
+.yj-trans {
+  display: block;
+  font-size: var(--yj-translation-size);
+  color: var(--yj-translation);
+  line-height: 1.75;
+  margin-top: 6px;
+  padding-top: 8px;
+  letter-spacing: 0.005em;
+  font-feature-settings: "palt";
+}
+.yj-trans[data-divider="solid"]  { border-top: 1px solid var(--yj-line); }
+.yj-trans[data-divider="dashed"] { border-top: 1px dashed var(--yj-line); }
+.yj-trans[data-divider="dotted"] { border-top: 1px dotted var(--yj-line); }
+.yj-trans[data-divider="bracket"]{
+  border-top: none;
+  padding-top: 4px;
+  position: relative;
+}
+.yj-trans[data-divider="bracket"]::before {
+  content: "│";
+  color: var(--yj-translation);
+  opacity: .5;
+  margin-right: 6px;
+}
+.yj-trans[data-divider="none"]   { border-top: none; padding-top: 4px; }
+
+/* Replacement-mode highlight (faint underline so user knows it's translated) */
+.yj-replaced {
+  border-bottom: 1px dotted color-mix(in srgb, var(--yj-translation) 50%, transparent);
+}
+
+/* Hover/word lookup */
+.yj-hover-word {
+  cursor: help;
+  position: relative;
+  background: linear-gradient(transparent 60%, color-mix(in srgb, var(--yj-translation) 22%, transparent) 60%);
+  padding: 0 1px;
+  border-radius: 2px;
+  transition: background .15s;
+}
+.yj-hover-word:hover {
+  background: color-mix(in srgb, var(--yj-translation) 28%, transparent);
+}
+
+/* The lookup card */
+.yj-lookup-card {
+  position: absolute;
+  z-index: 50;
+  width: 280px;
+  background: var(--yj-bg);
+  color: var(--yj-fg);
+  border: 1px solid var(--yj-line);
+  border-radius: 10px;
+  box-shadow: 0 18px 40px -12px rgba(20,30,50,0.18),
+              0 4px 12px -4px rgba(20,30,50,0.08);
+  padding: 12px 14px 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  animation: yj-pop .12s ease-out both;
+}
+[data-theme="dark"] .yj-lookup-card {
+  box-shadow: 0 18px 40px -12px rgba(0,0,0,0.6),
+              0 0 0 1px rgba(255,255,255,0.04);
+}
+@keyframes yj-pop {
+  from { opacity: 0; transform: translateY(4px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+.yj-lookup-card .lk-head {
+  display: flex; align-items: baseline; gap: 8px;
+  padding-bottom: 6px;
+}
+.yj-lookup-card .lk-word {
+  font-size: 18px; font-weight: 600; letter-spacing: -0.01em;
+}
+.yj-lookup-card .lk-ipa {
+  font-size: 12px; color: var(--yj-muted);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+.yj-lookup-card .lk-pron {
+  margin-left: auto;
+  width: 22px; height: 22px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--yj-accent-soft); color: var(--yj-accent);
+  cursor: pointer;
+  border: none; padding: 0;
+}
+.yj-lookup-card .lk-pron:hover { transform: scale(1.05); }
+.yj-lookup-card .lk-pos {
+  font-style: italic; color: var(--yj-muted); font-size: 12px;
+  margin-right: 6px;
+}
+.yj-lookup-card .lk-defs { margin: 4px 0 8px; }
+.yj-lookup-card .lk-def {
+  display: flex; gap: 8px; padding: 2px 0;
+}
+.yj-lookup-card .lk-actions {
+  display: flex; gap: 6px;
+  border-top: 1px solid var(--yj-line);
+  padding-top: 8px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--yj-muted);
+}
+.yj-lookup-card .lk-chip {
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--yj-card);
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.yj-lookup-card .lk-chip:hover { background: var(--yj-accent-soft); color: var(--yj-accent); }
+
+/* Toolbar at top of article showing mode + shortcut */
+.yj-toolbar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0 14px;
+  background: linear-gradient(var(--yj-bg) 70%, transparent);
+  z-index: 10;
+  font-size: 12px;
+  color: var(--yj-muted);
+  margin-bottom: 4px;
+}
+.yj-mode-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  background: var(--yj-accent-soft);
+  color: var(--yj-accent);
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: 11.5px;
+}
+.yj-mode-pill .glyph {
+  width: 14px; height: 14px; border-radius: 4px;
+  background: var(--yj-accent);
+  opacity: .9;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 9px; font-weight: 700;
+}
+.yj-kbd {
+  display: inline-flex; gap: 3px; align-items: center;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+.yj-kbd kbd {
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--yj-line);
+  background: var(--yj-card);
+  color: var(--yj-fg);
+  font-size: 10.5px;
+  line-height: 1.4;
+  box-shadow: 0 1px 0 var(--yj-line);
+}
+
+/* Inline loading shimmer for replacement mode */
+.yj-loading {
+  display: inline-block;
+  height: 0.9em;
+  vertical-align: middle;
+  border-radius: 3px;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--yj-translation) 14%, transparent),
+    color-mix(in srgb, var(--yj-translation) 28%, transparent),
+    color-mix(in srgb, var(--yj-translation) 14%, transparent));
+  background-size: 200% 100%;
+  animation: yj-shimmer 1.1s linear infinite;
+}
+@keyframes yj-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* Sidebar (mode 4) */
+.yj-with-side {
+  display: flex; flex: 1; min-height: 0;
+}
+.yj-with-side .yj-article {
+  flex: 1;
+  padding-right: 28px;
+}
+.yj-side {
+  width: 360px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--yj-line);
+  background: var(--yj-bg);
+  display: flex;
+  flex-direction: column;
+}
+.yj-side-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--yj-line);
+  padding: 0 12px;
+  flex-shrink: 0;
+}
+.yj-side-tab {
+  padding: 12px 12px 10px;
+  font-size: 12px;
+  color: var(--yj-muted);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  margin-right: 4px;
+}
+.yj-side-tab.active {
+  color: var(--yj-fg);
+  border-bottom-color: var(--yj-accent);
+  font-weight: 500;
+}
+.yj-side-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px 8px;
+}
+.yj-side-orig, .yj-side-trans {
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.yj-side-orig {
+  color: var(--yj-muted);
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--yj-line);
+}
+.yj-side-orig .src-label,
+.yj-side-trans .src-label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--yj-muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.yj-side-trans { color: var(--yj-fg); }
+
+.yj-ai-block {
+  margin: 14px 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--yj-accent-soft);
+  border: 1px solid color-mix(in srgb, var(--yj-accent) 25%, transparent);
+}
+[data-theme="dark"] .yj-ai-block {
+  background: color-mix(in srgb, var(--yj-accent) 14%, var(--yj-bg));
+}
+.yj-ai-head {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px;
+  color: var(--yj-accent);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.yj-ai-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--yj-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--yj-accent) 25%, transparent);
+}
+.yj-ai-msg {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--yj-fg);
+}
+.yj-ai-msg ul { margin: 4px 0 0; padding-left: 18px; }
+.yj-ai-msg li { margin-bottom: 2px; }
+
+.yj-side-input {
+  border-top: 1px solid var(--yj-line);
+  padding: 10px 12px 12px;
+  background: var(--yj-bg);
+}
+.yj-quickrow {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.yj-quick {
+  font-size: 11px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--yj-line);
+  background: var(--yj-bg);
+  color: var(--yj-muted);
+  cursor: pointer;
+}
+.yj-quick:hover {
+  color: var(--yj-accent);
+  border-color: color-mix(in srgb, var(--yj-accent) 40%, var(--yj-line));
+}
+.yj-input-wrap {
+  display: flex; align-items: flex-end; gap: 8px;
+  padding: 8px 8px 8px 12px;
+  border: 1px solid var(--yj-line);
+  border-radius: 12px;
+  background: var(--yj-card);
+  transition: border-color .15s, background .15s;
+}
+.yj-input-wrap:focus-within {
+  border-color: color-mix(in srgb, var(--yj-accent) 50%, var(--yj-line));
+  background: var(--yj-bg);
+}
+.yj-input-wrap textarea {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  resize: none;
+  color: var(--yj-fg);
+  font: 13px/1.5 inherit;
+  max-height: 80px;
+  min-height: 20px;
+  padding: 2px 0;
+}
+.yj-input-wrap textarea::placeholder { color: var(--yj-muted); }
+.yj-send {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  border: 0;
+  background: var(--yj-accent);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: opacity .15s, transform .1s;
+}
+.yj-send:hover { transform: translateY(-1px); }
+.yj-send:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+.yj-engine-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--yj-muted);
+}
+.yj-engine-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+.yj-engine-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #34c759;
+}
+
+/* Mode toggles inline (above article) */
+.yj-modeswitch {
+  display: inline-flex;
+  background: var(--yj-card);
+  border-radius: 8px;
+  padding: 2px;
+  font-size: 11px;
+  margin-left: auto;
+}
+.yj-modeswitch button {
+  border: 0; background: transparent;
+  color: var(--yj-muted);
+  padding: 4px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+.yj-modeswitch button.on {
+  background: var(--yj-bg);
+  color: var(--yj-fg);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 0 0 1px var(--yj-line);
+  font-weight: 500;
+}
+
+/* Right-click context menu */
+.yj-ctx-menu {
+  position: absolute;
+  z-index: 60;
+  background: var(--yj-bg);
+  border: 1px solid var(--yj-line);
+  border-radius: 8px;
+  box-shadow: 0 12px 30px -8px rgba(20,30,50,0.18);
+  padding: 4px;
+  min-width: 170px;
+  font-size: 12.5px;
+  animation: yj-pop .1s ease-out both;
+}
+.yj-ctx-item {
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.yj-ctx-item:hover { background: var(--yj-card); color: var(--yj-accent); }
+.yj-ctx-item .sc {
+  font-size: 10px;
+  color: var(--yj-muted);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+.yj-ctx-sep { height: 1px; background: var(--yj-line); margin: 4px 2px; }
+
+/* Selection bubble (划词 mode) */
+.yj-sel-bubble {
+  position: absolute;
+  z-index: 55;
+  background: #1f2937;
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px;
+  display: flex;
+  gap: 2px;
+  box-shadow: 0 12px 24px -8px rgba(0,0,0,0.35);
+  animation: yj-pop .12s ease-out both;
+  font-size: 12px;
+}
+.yj-sel-bubble button {
+  background: transparent;
+  border: 0;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.yj-sel-bubble button:hover { background: rgba(255,255,255,0.12); }
+.yj-sel-bubble .sep {
+  width: 1px; align-self: stretch; background: rgba(255,255,255,0.15); margin: 4px 2px;
+}
+
+/* Extension popup (toolbar action panel) */
+.yj-popup {
+  width: 320px;
+  background: var(--yj-bg);
+  color: var(--yj-fg);
+  border-radius: 12px;
+  box-shadow: 0 24px 48px -12px rgba(20,30,50,0.25), 0 0 0 1px var(--yj-line);
+  overflow: hidden;
+  font: 13px/1.5 -apple-system, BlinkMacSystemFont, "PingFang SC", system-ui, sans-serif;
+}
+.yj-popup-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--yj-line);
+}
+.yj-logo {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #2b6cb0, #4f8fd6);
+  color: #fff; font-weight: 700; font-size: 13px;
+  display: inline-flex; align-items: center; justify-content: center;
+  letter-spacing: -0.02em;
+}
+.yj-pop-name { font-weight: 600; }
+.yj-pop-name small {
+  display: block; color: var(--yj-muted); font-weight: 400; font-size: 11px; letter-spacing: 0.04em;
+}
+.yj-pop-power {
+  margin-left: auto;
+  position: relative;
+  width: 36px; height: 20px; border-radius: 999px;
+  background: #34c759;
+  cursor: pointer; border: 0; padding: 0;
+}
+.yj-pop-power i {
+  position: absolute; top: 2px; left: 18px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+.yj-pop-power[data-on="0"] { background: #c7c9cc; }
+.yj-pop-power[data-on="0"] i { left: 2px; }
+
+.yj-pop-section {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--yj-line);
+}
+.yj-pop-section:last-child { border-bottom: 0; }
+.yj-pop-section-title {
+  font-size: 10.5px; letter-spacing: 0.14em;
+  color: var(--yj-muted); text-transform: uppercase;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.yj-mode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.yj-mode-card {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 9px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid var(--yj-line);
+  background: var(--yj-bg);
+  transition: all .12s;
+}
+.yj-mode-card:hover { background: var(--yj-card); }
+.yj-mode-card.active {
+  background: var(--yj-accent-soft);
+  border-color: color-mix(in srgb, var(--yj-accent) 40%, transparent);
+}
+.yj-mode-card .mc-glyph {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  background: var(--yj-card);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+.yj-mode-card.active .mc-glyph {
+  background: var(--yj-accent);
+  color: #fff;
+}
+.yj-mode-card .mc-text {
+  display: flex; flex-direction: column;
+}
+.yj-mode-card .mc-name { font-size: 12px; font-weight: 500; }
+.yj-mode-card .mc-sub  { font-size: 10.5px; color: var(--yj-muted); }
+
+.yj-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 0;
+  font-size: 12.5px;
+}
+.yj-row + .yj-row { border-top: 1px solid var(--yj-line); }
+.yj-row .lbl { color: var(--yj-fg); }
+.yj-row .lbl small { display: block; color: var(--yj-muted); font-size: 10.5px; }
+.yj-pop-select {
+  padding: 4px 24px 4px 8px;
+  border: 1px solid var(--yj-line);
+  border-radius: 6px;
+  background: var(--yj-bg);
+  color: var(--yj-fg);
+  font: inherit; font-size: 12px;
+}
+.yj-tiny-toggle {
+  position: relative;
+  width: 30px; height: 17px; border-radius: 999px;
+  background: #c7c9cc;
+  cursor: pointer; border: 0; padding: 0;
+}
+.yj-tiny-toggle[data-on="1"] { background: var(--yj-accent); }
+.yj-tiny-toggle i {
+  position: absolute; top: 2px; left: 2px;
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+  transition: transform .14s;
+}
+.yj-tiny-toggle[data-on="1"] i { transform: translateX(13px); }
+
+.yj-pop-foot {
+  display: flex; gap: 6px; padding: 10px 16px;
+  font-size: 11.5px;
+  color: var(--yj-muted);
+  align-items: center;
+}
+.yj-pop-foot .yj-kbd kbd { font-size: 10px; padding: 0 5px; }
+
+/* API config inputs */
+.yj-pop-input {
+  flex: 1;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--yj-line);
+  border-radius: 6px;
+  background: var(--yj-bg);
+  color: var(--yj-fg);
+  font: 11.5px ui-monospace, "SF Mono", Menlo, monospace;
+  outline: none;
+  width: 100%;
+  transition: border-color .12s, background .12s;
+}
+.yj-pop-input:focus {
+  border-color: color-mix(in srgb, var(--yj-accent) 50%, var(--yj-line));
+  background: var(--yj-bg);
+}
+.yj-pop-input::placeholder { color: var(--yj-muted); opacity: .7; }
+
+.yj-icon-btn {
+  width: 28px; height: 28px;
+  border: 1px solid var(--yj-line);
+  border-radius: 6px;
+  background: var(--yj-bg);
+  color: var(--yj-muted);
+  cursor: pointer;
+  font-size: 11px;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.yj-icon-btn:hover { color: var(--yj-fg); background: var(--yj-card); }
+
+.yj-btn-primary {
+  height: 26px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--yj-accent);
+  color: #fff;
+  font: 500 11.5px inherit;
+  cursor: pointer;
+  transition: opacity .12s, transform .08s;
+}
+.yj-btn-primary:hover { transform: translateY(-1px); }
+.yj-btn-primary:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+.yj-btn-ghost {
+  height: 26px;
+  padding: 0 12px;
+  border: 1px solid var(--yj-line);
+  border-radius: 6px;
+  background: var(--yj-bg);
+  color: var(--yj-fg);
+  font: 500 11.5px inherit;
+  cursor: pointer;
+}
+.yj-btn-ghost:hover { background: var(--yj-card); }
+
+/* Tab title row in browser window — white-ish font selectable */
+.yj-cap {
+  position: absolute;
+  bottom: 8px; left: 14px;
+  font: 11px ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--yj-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--yj-bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--yj-line);
+  pointer-events: none;
+}
+
+/* Floating mini-translator anchor on Mode-3 — appears at corner */
+.yj-floater {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  background: var(--yj-bg);
+  border: 1px solid var(--yj-line);
+  border-radius: 999px;
+  padding: 6px 10px 6px 8px;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px;
+  color: var(--yj-muted);
+  box-shadow: 0 6px 14px -6px rgba(0,0,0,0.15);
+  z-index: 5;
+}
+.yj-floater .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #34c759;
+  box-shadow: 0 0 0 3px rgba(52,199,89,0.18);
+}
+</style>
+<style>
+  html, body { margin: 0; height: 100%; background: #f0eee9; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", system-ui, sans-serif; }
+  #root { width: 100%; height: 100%; }
+  /* fade-in for artboard contents */
+  .yj-page { animation: yj-fade .18s ease-out; }
+  @keyframes yj-fade { from { opacity: 0; } to { opacity: 1; } }
+  /* extension floating-popup positioning relative to a Chrome bar */
+  .yj-popup-anchor {
+    position: absolute;
+    top: 60px;
+    right: 36px;
+    z-index: 30;
+    filter: drop-shadow(0 18px 28px rgba(20,30,50,0.18));
+  }
+  .yj-popup-anchor::before {
+    content: "";
+    position: absolute;
+    top: -8px; right: 28px;
+    width: 14px; height: 14px;
+    background: var(--yj-bg);
+    border-left: 1px solid var(--yj-line);
+    border-top: 1px solid var(--yj-line);
+    transform: rotate(45deg);
+  }
+  /* tiny pulse on the extension icon in the chrome */
+  .yj-ext-icon {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #2b6cb0, #4f8fd6);
+    color: #fff;
+    font: 600 11px/1 -apple-system, system-ui, sans-serif;
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 0 rgba(43,108,176,0.5);
+    animation: yj-pulse 2.4s infinite;
+  }
+  @keyframes yj-pulse {
+    0%   { box-shadow: 0 0 0 0   rgba(43,108,176,0.45); }
+    70%  { box-shadow: 0 0 0 10px rgba(43,108,176,0); }
+    100% { box-shadow: 0 0 0 0   rgba(43,108,176,0); }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="48fd1145-2ec0-4873-a163-0e732f5ac230" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="4ce91e43-6990-493a-be63-476221ab529a" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="d05a1590-4f16-4430-a721-050a023a3244" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="c5561ae6-6fab-4bd6-8834-74c33f2cb4ce"></script>
+<script type="text/babel" src="b1ea46d4-e345-4050-9f78-c9e1180e581d"></script>
+<script type="text/babel" src="a61c807c-8f67-4c3c-89d2-02773a53edfd"></script>
+<script type="text/babel" src="7ae9c052-609a-41e0-90f6-72b1dd2e05ef"></script>
+<script type="text/babel" src="d19d7c8e-6238-40bf-ac53-1192b6ea3517"></script>
+<script type="text/babel" src="36291b95-726e-42c0-a903-bc518563da4a"></script>
+
+<script type="text/babel" data-presets="react">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "light",
+  "engine": "DeepSeek",
+  "transColor": "#2b6cb0",
+  "transFontSize": 15,
+  "divider": "solid",
+  "showPopup": true,
+  "platform": "auto"
+}/*EDITMODE-END*/;
+
+// Detect platform once and stash on window so all components see the same key label.
+(function() {
+  const stored = TWEAK_DEFAULTS.platform;
+  const isMac = stored === 'mac' ? true
+              : stored === 'win' ? false
+              : /Mac|iPhone|iPad/.test(navigator.platform);
+  window.__YJ_MOD = isMac ? 'Option' : 'Alt';
+  window.__YJ_IS_MAC = isMac;
+})();
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  // Re-set the modifier when the user toggles platform via Tweaks
+  React.useEffect(() => {
+    const isMac = t.platform === 'mac' ? true
+                : t.platform === 'win' ? false
+                : /Mac|iPhone|iPad/.test(navigator.platform);
+    window.__YJ_MOD = isMac ? 'Option' : 'Alt';
+    window.__YJ_IS_MAC = isMac;
+  }, [t.platform]);
+  // each artboard gets its own active mode in case the user wants to tinker
+  const [modes, setModes] = React.useState({
+    a1: 'bilingual', a2: 'replace', a3: 'hover', a4: 'sidebar'
+  });
+  const setMode = (key) => (m) => setModes(s => ({ ...s, [key]: m }));
+
+  // Compute modifier label as React state so components actually re-render on change
+  const mod = React.useMemo(() => {
+    const isMac = t.platform === 'mac' ? true
+                : t.platform === 'win' ? false
+                : /Mac|iPhone|iPad/.test(navigator.platform);
+    const m = isMac ? 'Option' : 'Alt';
+    window.__YJ_MOD = m;  // set synchronously so children read fresh value
+    return m;
+  }, [t.platform]);
+
+  // dark/light forwarding via attribute
+  React.useEffect(() => {
+    document.querySelectorAll('[data-theme-target="1"]').forEach(el => {
+      el.setAttribute('data-theme', t.theme);
+    });
+  }, [t.theme]);
+
+  // The extension-popup also lives inside an artboard so the user can see how the
+  // toolbar action looks. We render it as the 5th artboard.
+  const ABwidth = 920;
+  const ABheight = 640;
+
+  return (
+    <>
+      <DesignCanvas>
+        <DCSection
+          id="modes"
+          title="化境 Huàjìng · 4 种翻译模式"
+          subtitle="A Chrome extension that overlays translation onto the page you're already reading"
+        >
+          <DCArtboard id="a1" label="① 双语对照（沉浸式）" width={ABwidth} height={ABheight}>
+            <ArtboardFrame mode="bilingual" theme={t.theme}>
+              <BilingualMode
+                divider={t.divider}
+                fontSize={t.transFontSize}
+                transColor={t.transColor}
+                switchMode={setMode('a1')}
+              />
+            </ArtboardFrame>
+          </DCArtboard>
+
+          <DCArtboard id="a2" label="② 原文替换" width={ABwidth} height={ABheight}>
+            <ArtboardFrame mode="replace" theme={t.theme}>
+              <ReplaceMode switchMode={setMode('a2')} />
+            </ArtboardFrame>
+          </DCArtboard>
+
+          <DCArtboard id="a3" label="③ 划词 / 悬停查询" width={ABwidth} height={ABheight}>
+            <ArtboardFrame mode="hover" theme={t.theme}>
+              <HoverMode switchMode={setMode('a3')} />
+            </ArtboardFrame>
+          </DCArtboard>
+
+          <DCArtboard id="a4" label="④ 侧栏对照 + AI 问答" width={ABwidth} height={ABheight}>
+            <ArtboardFrame mode="sidebar" theme={t.theme} popup={false}>
+              <SidebarMode engine={t.engine} switchMode={setMode('a4')} />
+            </ArtboardFrame>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          id="extension-popup"
+          title="工具栏弹窗 · Extension popup"
+          subtitle="Click the toolbar icon → settings panel"
+        >
+          <DCArtboard id="popup" label="⑤ 弹窗设置面板" width={420} height={640}>
+            <div data-theme={t.theme}
+              style={{
+                width: '100%', height: '100%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: 30,
+                background: t.theme === 'dark'
+                  ? 'radial-gradient(ellipse at top, #2a2d31, #15171a)'
+                  : 'radial-gradient(ellipse at top, #f4f6f8, #e6e9ee)'
+              }}>
+              <ExtensionPopup
+                mode={modes.a1}
+                setMode={(m) => setModes(s => ({ ...s, a1: m, a2: m, a3: m, a4: m }))}
+                engine={t.engine}
+                setEngine={(v) => setTweak('engine', v)}
+                dark={t.theme === 'dark'}
+                setDark={(v) => setTweak('theme', v ? 'dark' : 'light')}
+                theme={t.theme}
+              />
+            </div>
+          </DCArtboard>
+
+          <DCArtboard id="popup-context" label="⑥ 上下文：点击工具栏图标" width={920} height={640}>
+            <ArtboardFrame mode="bilingual" theme={t.theme} popup={true}
+              divider={t.divider} fontSize={t.transFontSize} transColor={t.transColor}
+              engine={t.engine}
+              setEngine={(v) => setTweak('engine', v)}
+              setDark={(v) => setTweak('theme', v ? 'dark' : 'light')}
+              setMode={(m) => setModes(s => ({ ...s, a1: m }))}
+              switchMode={setMode('a1')}
+              activeMode={modes.a1}
+            >
+              {modes.a1 === 'bilingual' &&
+                <BilingualMode divider={t.divider} fontSize={t.transFontSize}
+                  transColor={t.transColor} switchMode={setMode('a1')} />}
+              {modes.a1 === 'replace'   && <ReplaceMode  switchMode={setMode('a1')} />}
+              {modes.a1 === 'hover'     && <HoverMode    switchMode={setMode('a1')} />}
+              {modes.a1 === 'sidebar'   && <SidebarMode  engine={t.engine} switchMode={setMode('a1')} />}
+            </ArtboardFrame>
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+
+      <TweaksPanel title="Tweaks · 化境">
+        <TweakSection label="主题" />
+        <TweakRadio label="模式" value={t.theme}
+          options={[{value:'light', label:'浅色'}, {value:'dark', label:'深色'}]}
+          onChange={(v) => setTweak('theme', v)} />
+        <TweakRadio label="平台" value={t.platform}
+          options={[
+            {value:'auto', label:'自动'},
+            {value:'mac',  label:'Mac'},
+            {value:'win',  label:'Win'},
+          ]}
+          onChange={(v) => setTweak('platform', v)} />
+
+        <TweakSection label="译文样式" />
+        <TweakColor  label="译文颜色" value={t.transColor}
+          onChange={(v) => setTweak('transColor', v)} />
+        <TweakSlider label="译文字号" value={t.transFontSize} min={12} max={20} unit="px"
+          onChange={(v) => setTweak('transFontSize', v)} />
+        <TweakSelect label="对照分隔线" value={t.divider}
+          options={[
+            {value:'solid',  label:'实线'},
+            {value:'dashed', label:'虚线'},
+            {value:'dotted', label:'点线'},
+            {value:'bracket',label:'引用线'},
+            {value:'none',   label:'无'},
+          ]}
+          onChange={(v) => setTweak('divider', v)} />
+
+        <TweakSection label="AI" />
+        <TweakSelect label="AI 引擎" value={t.engine}
+          options={[
+            {value:'DeepSeek', label:'DeepSeek'},
+            {value:'GPT-4o',   label:'GPT-4o'},
+            {value:'Claude Sonnet', label:'Claude Sonnet'},
+            {value:'Gemini',   label:'Gemini'},
+          ]}
+          onChange={(v) => setTweak('engine', v)} />
+      </TweaksPanel>
+    </>
+  );
+}
+
+// ─── Reusable Browser-window shell wrapping any of the 4 modes ───────────────
+function ArtboardFrame({ mode, theme, popup, children }) {
+  return (
+    <div data-theme={theme} style={{ width: '100%', height: '100%', position: 'relative', borderRadius: 10, overflow: 'hidden' }}>
+      <ChromeWindowShell theme={theme}>
+        {children}
+      </ChromeWindowShell>
+      {popup && (
+        <div className="yj-popup-anchor" data-theme={theme}>
+          <ExtensionPopup
+            mode="bilingual"
+            setMode={() => {}}
+            engine="DeepSeek"
+            setEngine={() => {}}
+            dark={theme === 'dark'}
+            setDark={() => {}}
+            theme={theme}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// A simplified Chrome shell — extending the starter Chrome window to highlight
+// the extension icon in the toolbar. We don't reuse ChromeWindow directly because
+// we need the extension icon to be a recognizable accent.
+function ChromeWindowShell({ theme, children }) {
+  const dark = theme === 'dark';
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      display: 'flex', flexDirection: 'column',
+      background: dark ? '#15171a' : '#fff',
+    }}>
+      {/* tab bar */}
+      <div style={{
+        display: 'flex', alignItems: 'center', height: 36,
+        background: dark ? '#202124' : '#dee1e6',
+        paddingRight: 8, flexShrink: 0,
+      }}>
+        <div style={{ display:'flex', gap:7, padding:'0 12px' }}>
+          <span style={{ width:11, height:11, borderRadius:'50%', background:'#ff5f57' }}/>
+          <span style={{ width:11, height:11, borderRadius:'50%', background:'#febc2e' }}/>
+          <span style={{ width:11, height:11, borderRadius:'50%', background:'#28c840' }}/>
+        </div>
+        <div style={{
+          alignSelf: 'flex-end',
+          height: 28, padding: '0 14px 0 12px',
+          background: dark ? '#35363a' : '#fff',
+          borderRadius: '8px 8px 0 0',
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          fontSize: 11.5, color: dark ? '#e8eaed' : '#202124',
+          minWidth: 240,
+        }}>
+          <span style={{ width:11, height:11, borderRadius:'50%', background:'#9aa0a6', opacity: .6 }}/>
+          <span style={{
+            flex: 1, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'
+          }}>The Quiet Renaissance of Browser Extensions — The Daily</span>
+          <span style={{ color: dark ? '#9aa0a6':'#5f6368', fontSize: 10 }}>×</span>
+        </div>
+        <div style={{ flex: 1 }} />
+      </div>
+
+      {/* address bar */}
+      <div style={{
+        height: 36, background: dark ? '#35363a' : '#fff',
+        display: 'flex', alignItems: 'center', gap: 8,
+        padding: '0 10px',
+        borderBottom: dark ? '1px solid #1a1c1f' : '1px solid #e6e8eb',
+        flexShrink: 0,
+      }}>
+        {['‹','›','↻'].map((g, i) => (
+          <span key={i} style={{
+            width: 22, height: 22, display: 'inline-flex',
+            alignItems: 'center', justifyContent: 'center',
+            color: dark ? '#9aa0a6' : '#5f6368', fontSize: 14,
+          }}>{g}</span>
+        ))}
+        <div style={{
+          flex: 1, height: 26, borderRadius: 13,
+          background: dark ? '#282a2d' : '#f1f3f4',
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          padding: '0 12px', fontSize: 11.5,
+          color: dark ? '#bdc1c6' : '#202124',
+        }}>
+          <span style={{ opacity: .6 }}>🔒</span>
+          <span style={{ opacity: .6 }}>thedaily.example.com</span>
+          <span style={{ flex: 1 }} />
+          <span style={{ opacity: .4 }}>★</span>
+        </div>
+        {/* extension area */}
+        <span className="yj-ext-icon" title="化境 Huàjìng">化</span>
+        <span style={{
+          width: 26, height: 26, borderRadius: '50%',
+          background: 'linear-gradient(135deg,#c9d6e8,#8ea3c2)',
+          flexShrink: 0,
+        }} />
+      </div>
+
+      {/* page contents */}
+      <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+
+</body></html>
