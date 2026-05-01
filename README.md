@@ -8,6 +8,21 @@ Chrome MV3 翻译扩展。支持划词查词、划词翻译、朗读、生词本
 - **实施计划**：`docs/superpowers/plans/2026-04-26-huajing-v0.1.md`
 - **设计稿源**：`_design-source/`（在浏览器开 `index.html` 看原型）
 
+## 普通用户安装
+
+不需要执行 `pnpm`，也不需要安装 Git、Node.js 或任何开发工具。
+
+1. 打开 [Releases](https://github.com/0xHanniba1/huajing/releases)
+2. 下载最新版里的 `huajing-chrome-mv3.zip`
+3. 解压这个 zip，得到一个包含 `manifest.json` 的文件夹
+4. 打开 Chrome，进入 `chrome://extensions/`
+5. 开启右上角“开发者模式”
+6. 点击“加载已解压的扩展程序”
+7. 选择第 3 步解压出来的文件夹
+8. 打开扩展弹窗，选择服务商，填写 API Key，点击“测试连接”
+
+更新版本时，下载新的 zip，解压后覆盖旧文件夹，然后在 `chrome://extensions/` 里点击化境卡片上的刷新按钮。
+
 ## Features
 
 - 划词查词：选中单个英文单词后展示音标、释义，并可加入生词本
@@ -17,7 +32,7 @@ Chrome MV3 翻译扩展。支持划词查词、划词翻译、朗读、生词本
 - 生词本：搜索、删除、标记学习状态
 - 样式配置：译文颜色、字号、分隔样式和浅/深色模式
 
-## Quick Start
+## 开发者运行
 
 ```bash
 pnpm install
@@ -25,7 +40,7 @@ pnpm install
 pnpm dev
 ```
 
-加载方式：
+开发模式加载方式：
 
 1. 打开 `chrome://extensions/`
 2. 开启开发者模式
