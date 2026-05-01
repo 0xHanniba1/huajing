@@ -21,7 +21,7 @@ export function App() {
         <span className="hj-logo">化</span>
         <span className="hj-pop-name">
           <span className="n">化境 Huàjìng</span>
-          <span className="v">v1.0.0</span>
+          <span className="v">v1.0.1</span>
         </span>
         <div className="hj-pop-head-right">
           <span className="lbl-sm">深色模式</span>
@@ -57,7 +57,7 @@ export function App() {
           <span className="hj-row-r">
             <select className="hj-pop-select" value={settings.engine} onChange={(e) => patch({ engine: e.target.value as EngineId })}>
               <option value="deepseek">DeepSeek</option>
-              <option value="openai">GPT-4o</option>
+              <option value="openai">OpenAI</option>
               <option value="anthropic">Claude Sonnet</option>
               <option value="gemini">Gemini</option>
             </select>

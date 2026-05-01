@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { send } from './rpc';
 
-const originalSendMessage = chrome.runtime.sendMessage;
+const originalRuntime = chrome.runtime;
 
 afterEach(() => {
-  chrome.runtime.sendMessage = originalSendMessage;
+  (chrome as any).runtime = originalRuntime;
 });
 
 describe('rpc send', () => {
@@ -12,5 +12,12 @@ describe('rpc send', () => {
     chrome.runtime.sendMessage = vi.fn(async () => ({ error: 'boom' }));
 
     await expect(send({ type: 'test-connection', engineId: 'deepseek' })).rejects.toThrow('boom');
+  });
+
+  it('throws a clear error when extension messaging is unavailable', async () => {
+    (chrome as any).runtime = undefined;
+
+    await expect(send({ type: 'test-connection', engineId: 'deepseek' }))
+      .rejects.toThrow('扩展消息通道不可用');
   });
 });

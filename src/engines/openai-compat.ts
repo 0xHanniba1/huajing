@@ -23,7 +23,8 @@ export function makeOpenAICompatEngine(id: EngineId): Engine {
         body: JSON.stringify({
           model: opts.config.model,
           messages: [{ role: 'user', content: 'ping' }],
-          max_tokens: 1,
+          max_tokens: 16,
+          stream: true,
         }),
         signal: opts.signal,
       });
@@ -43,10 +44,32 @@ async function completeChat(prompt: string, opts: Parameters<Engine['translateBa
       model: opts.config.model,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.2,
+      stream: true,
     }),
     signal: opts.signal,
   });
   if (!r.ok) throw new EngineError(`HTTP ${r.status}`, await r.text(), r.status);
-  const j: any = await r.json();
-  return j?.choices?.[0]?.message?.content ?? '';
+  return parseChatCompletionText(await r.text());
+}
+
+function parseChatCompletionText(raw: string): string {
+  const body = raw.trim();
+  if (!body) return '';
+
+  if (!body.startsWith('data:')) {
+    const j: any = JSON.parse(body);
+    return j?.choices?.[0]?.message?.content ?? '';
+  }
+
+  let output = '';
+  for (const rawLine of body.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line.startsWith('data:')) continue;
+    const payload = line.slice('data:'.length).trim();
+    if (!payload || payload === '[DONE]') continue;
+
+    const j: any = JSON.parse(payload);
+    output += j?.choices?.[0]?.delta?.content ?? j?.choices?.[0]?.message?.content ?? '';
+  }
+  return output;
 }

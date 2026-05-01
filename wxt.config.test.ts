@@ -4,8 +4,8 @@ import { resolve } from 'node:path';
 import config from './wxt.config';
 
 describe('extension manifest config', () => {
-  it('uses the 1.0.0 extension manifest version', () => {
-    expect((config as { manifest?: { version?: string } }).manifest?.version).toBe('1.0.0');
+  it('uses the 1.0.1 extension manifest version', () => {
+    expect((config as { manifest?: { version?: string } }).manifest?.version).toBe('1.0.1');
   });
 
   it('does not register keyboard commands', () => {

@@ -1,9 +1,12 @@
 import { Msg, MsgResult } from './types';
 
+const MESSAGING_UNAVAILABLE_MESSAGE = '扩展消息通道不可用，请刷新页面或重新加载化境扩展';
+
 export async function send<T extends Msg['type']>(
   msg: Extract<Msg, { type: T }>
 ): Promise<MsgResult[T]> {
-  const result = await chrome.runtime.sendMessage(msg);
+  const sendMessage = getRuntimeSendMessage();
+  const result = await sendMessage(msg);
   if (isErrorEnvelope(result)) throw new Error(result.error);
   return result;
 }
@@ -27,4 +30,20 @@ function isErrorEnvelope(value: unknown): value is { error: string } {
     && typeof value === 'object'
     && Object.keys(value).length === 1
     && typeof (value as { error?: unknown }).error === 'string';
+}
+
+function getRuntimeSendMessage(): (msg: Msg) => Promise<unknown> {
+  const runtime = (globalThis as {
+    chrome?: {
+      runtime?: {
+        sendMessage?: (msg: Msg) => Promise<unknown>;
+      };
+    };
+  }).chrome?.runtime;
+
+  if (typeof runtime?.sendMessage !== 'function') {
+    throw new Error(MESSAGING_UNAVAILABLE_MESSAGE);
+  }
+
+  return runtime.sendMessage.bind(runtime);
 }
