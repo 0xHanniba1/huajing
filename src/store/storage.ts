@@ -1,12 +1,18 @@
 // src/store/storage.ts
 import { DEFAULT_SETTINGS, Settings, VocabEntry } from './types';
 
+type StoredSettings = Partial<Settings> & {
+  engineConfigs?: Partial<Settings['engineConfigs']>;
+};
+
 export async function getSettings(): Promise<Settings> {
-  const { settings } = await chrome.storage.local.get('settings');
+  const { settings } = await chrome.storage.local.get('settings') as { settings?: StoredSettings };
   if (!settings) return { ...DEFAULT_SETTINGS };
+  const mode = settings.mode === 'hover' ? settings.mode : DEFAULT_SETTINGS.mode;
   return {
     ...DEFAULT_SETTINGS,
     ...settings,
+    mode,
     engineConfigs: { ...DEFAULT_SETTINGS.engineConfigs, ...(settings.engineConfigs || {}) },
   };
 }

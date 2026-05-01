@@ -1,7 +1,7 @@
 {
   "name": "huajing",
   "version": "1.0.0",
-  "description": "",
+  "description": "Chrome MV3 translation extension with BYOK LLM providers, selection translation, and vocabulary notes.",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -11,9 +11,24 @@
     "test": "vitest",
     "test:run": "vitest run"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "chrome-extension",
+    "translation",
+    "llm",
+    "byok",
+    "wxt",
+    "react"
+  ],
+  "author": "0xHanniba1",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0xHanniba1/huajing.git"
+  },
+  "bugs": {
+    "url": "https://github.com/0xHanniba1/huajing/issues"
+  },
+  "homepage": "https://github.com/0xHanniba1/huajing#readme",
   "packageManager": "pnpm@10.33.2",
   "devDependencies": {
     "@types/chrome": "^0.1.40",

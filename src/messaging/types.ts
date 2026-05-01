@@ -1,16 +1,14 @@
-import { Settings, EngineId, VocabEntry } from '../store/types';
+import { Settings, EngineId, TargetLang, VocabEntry } from '../store/types';
 import { DictEntry } from '../dict/types';
 
 export type Msg =
-  | { type: 'translate-batch'; texts: string[]; targetLang: string }
-  | { type: 'lookup-word'; word: string }
+  | { type: 'translate-batch'; texts: string[]; targetLang: TargetLang }
+  | { type: 'lookup-word'; word: string; targetLang: TargetLang }
   | { type: 'test-connection'; engineId: EngineId }
   | { type: 'add-vocab'; entry: VocabEntry }
   | { type: 'remove-vocab'; word: string }
   | { type: 'open-options' }
-  | { type: 'settings-changed'; settings: Settings }
-  | { type: 'cmd-toggle' }
-  | { type: 'cmd-cycle-mode' };
+  | { type: 'settings-changed'; settings: Settings };
 
 export type MsgResult = {
   'translate-batch': { translations: string[] };
@@ -20,6 +18,4 @@ export type MsgResult = {
   'remove-vocab': { ok: true };
   'open-options': { ok: true };
   'settings-changed': void;
-  'cmd-toggle': void;
-  'cmd-cycle-mode': void;
 };

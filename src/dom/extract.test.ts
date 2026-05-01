@@ -45,4 +45,20 @@ describe('extractParagraphs', () => {
     expect(ps[0]!.hash).toBeTruthy();
     expect(ps[0]!.id).not.toBe(ps[1]!.id);
   });
+  it('includes the root node when it is itself a translatable block', () => {
+    document.body.innerHTML = `<p>New dynamic paragraph here.</p>`;
+    const p = document.querySelector('p')!;
+    const ps = extractParagraphs(p);
+    expect(ps.map((item) => item.text)).toEqual(['New dynamic paragraph here.']);
+  });
+  it('抓 X/Twitter tweetText div 正文', () => {
+    document.body.innerHTML = `
+      <article>
+        <div data-testid="tweetText" lang="en">
+          <span>My philosophy is curiosity &amp; adventure.</span>
+        </div>
+      </article>`;
+    const ps = extractParagraphs(document.body);
+    expect(ps.map((p) => p.text)).toEqual(['My philosophy is curiosity & adventure.']);
+  });
 });

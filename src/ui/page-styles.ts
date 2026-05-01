@@ -15,8 +15,13 @@ const PAGE_CSS = `
 .hj-trans[data-divider="bracket"]{ border-top: none; padding-top: 4px; position: relative; }
 .hj-trans[data-divider="bracket"]::before { content: "│"; color: var(--hj-trans-color, #2b6cb0); opacity: .5; margin-right: 6px; }
 .hj-trans[data-divider="none"]   { border-top: none; padding-top: 4px; }
-
-.hj-replaced { border-bottom: 1px dotted rgba(43,108,176,.5); }
+.hj-trans.hj-trans-inline {
+  display: inline;
+  margin: 0 0 0 .35em;
+  padding: 0;
+  border-top: 0;
+  white-space: normal;
+}
 
 .hj-loading {
   display: inline-block; height: .9em; vertical-align: middle; border-radius: 3px;
@@ -24,14 +29,7 @@ const PAGE_CSS = `
   background-size: 200% 100%; animation: hj-shimmer 1.1s linear infinite;
 }
 @keyframes hj-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
-
-.hj-hover-word {
-  cursor: help; position: relative;
-  background: linear-gradient(transparent 60%, rgba(43,108,176,.22) 60%);
-  padding: 0 1px; border-radius: 2px; transition: background .15s;
-}
-.hj-hover-word:hover { background: rgba(43,108,176,.28); }
-`;
+	`;
 
 let injected = false;
 export function injectPageStyles(): void {

@@ -1,99 +1,36 @@
-import React from 'react';
-import { extractParagraphs, Paragraph } from '../dom/extract';
-import { observeNewParagraphs } from '../dom/observe';
-import { renderBilingual, removeBilingual } from '../modes/bilingual';
-import { renderReplace, restoreAllReplace } from '../modes/replace';
-import { wrapWords, unwrapWords } from '../modes/hover/tokenize';
-import { bindHover } from '../modes/hover/controller';
+import { removeTranslations } from '../modes/translation-node';
 import { bindSelection } from '../modes/hover/selection';
 import { Settings, Mode } from '../store/types';
-import { send } from '../messaging/rpc';
 import { injectPageStyles } from '../ui/page-styles';
 import { ensureOverlay } from '../ui/overlay-root';
-import { ReplaceToast } from '../ui/Toast';
-import { DictEntry } from '../dict/types';
 
 let active: Mode | null = null;
-let unobserve: (() => void) | null = null;
-const handled = new Set<string>();
-const wrapped = new Set<Element>();
+let cleanupSelection: (() => void) | null = null;
+let currentSettings: Settings | null = null;
 
 export async function activate(settings: Settings, mode: Mode) {
   if (active) deactivate();
+  currentSettings = settings;
   active = mode;
   injectPageStyles();
-  const all = extractParagraphs(document.body);
-  if (mode === 'hover') {
-    all.forEach((p) => { wrapWords(p.el); wrapped.add(p.el); });
-    bindHover(document.body, addVocabEntry);
-    bindSelection(() => settings.targetLang);
-    unobserve = observeNewParagraphs(document.body, (added) => {
-      added.forEach((p) => { if (!wrapped.has(p.el)) { wrapWords(p.el); wrapped.add(p.el); } });
-    });
-  } else {
-    await translateAndRender(all, settings, mode);
-    unobserve = observeNewParagraphs(document.body, (added) => {
-      translateAndRender(added, settings, mode).catch(() => {});
-    });
-    if (mode === 'replace') showReplaceToast(settings);
-  }
+  cleanupSelection = bindSelection(() => currentSettings ?? settings);
 }
 
 export function deactivate() {
   if (!active) return;
-  unobserve?.(); unobserve = null;
-  document.querySelectorAll('[data-hj="1"]').forEach((el) => removeBilingual(el));
-  restoreAllReplace();
-  for (const el of wrapped) unwrapWords(el);
-  wrapped.clear();
+  cleanupSelection?.(); cleanupSelection = null;
+  document.querySelectorAll('[data-hj="1"]').forEach((el) => removeTranslations(el));
   ensureOverlay().clear();
-  handled.clear();
   active = null;
+  currentSettings = null;
 }
 
 export function rerender(settings: Settings) {
-  if (active === 'bilingual') {
-    document.querySelectorAll('[data-hj="1"]').forEach((el) => {
-      const span = el.querySelector(':scope > .hj-trans');
-      if (!span) return;
-      span.setAttribute('data-divider', settings.divider);
-      (span as HTMLElement).style.setProperty('--hj-trans-color', settings.transColor);
-      (span as HTMLElement).style.setProperty('--hj-trans-size', `${settings.transFontSize}px`);
-    });
-  }
-}
-
-async function translateAndRender(paragraphs: Paragraph[], settings: Settings, mode: Mode) {
-  const todo = paragraphs.filter((p) => !handled.has(p.hash));
-  if (!todo.length) return;
-  todo.forEach((p) => handled.add(p.hash));
-  for (let i = 0; i < todo.length; i += 8) {
-    const batch = todo.slice(i, i + 8);
-    const { translations } = await send({
-      type: 'translate-batch', texts: batch.map((p) => p.text), targetLang: settings.targetLang,
-    });
-    batch.forEach((p, j) => {
-      const t = translations[j];
-      if (!t) return;
-      if (mode === 'bilingual') {
-        renderBilingual(p.el, t, { divider: settings.divider, color: settings.transColor, fontSize: settings.transFontSize });
-      } else if (mode === 'replace') {
-        renderReplace(p.el, t);
-      }
-    });
-  }
-}
-
-function showReplaceToast(settings: Settings) {
-  const ov = ensureOverlay();
-  ov.render(
-    <ReplaceToast
-      onRetranslate={() => { handled.clear(); activate(settings, 'replace'); }}
-      onClose={() => ov.clear()}
-    />
-  );
-}
-
-async function addVocabEntry(entry: DictEntry, ctx: string) {
-  await send({ type: 'add-vocab', entry: { word: entry.word, addedAt: Date.now(), status: 'new', context: ctx, sourceURL: location.href } });
+  currentSettings = settings;
+  if (!active) return;
+  document.querySelectorAll('.hj-trans').forEach((span) => {
+    span.setAttribute('data-divider', settings.divider);
+    (span as HTMLElement).style.setProperty('--hj-trans-color', settings.transColor);
+    (span as HTMLElement).style.setProperty('--hj-trans-size', `${settings.transFontSize}px`);
+  });
 }

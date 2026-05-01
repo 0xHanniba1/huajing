@@ -3,5 +3,11 @@ node_modules/
 .wxt/
 *.log
 .DS_Store
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
 assets/ecdict.lemma.json.gz
 public/ecdict.lemma.json.gz

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { anthropicEngine } from './anthropic';
 
-const cfg = { apiKey: 'sk-ant-x', baseURL: 'https://api.anthropic.com/v1', model: 'claude-sonnet-4-5' };
+const cfg = { apiKey: 'test-anthropic-key', baseURL: 'https://api.anthropic.com/v1', model: 'claude-sonnet-4-5' };
 
 beforeEach(() => vi.restoreAllMocks());
 
@@ -15,7 +15,7 @@ describe('anthropic engine', () => {
     const [url, init] = fetchSpy.mock.calls[0]!;
     expect(url).toBe('https://api.anthropic.com/v1/messages');
     const headers = (init as RequestInit).headers as Record<string, string>;
-    expect(headers['x-api-key']).toBe('sk-ant-x');
+    expect(headers['x-api-key']).toBe('test-anthropic-key');
     expect(headers['anthropic-version']).toBe('2023-06-01');
     const body = JSON.parse((init as RequestInit).body as string);
     expect(body.model).toBe('claude-sonnet-4-5');

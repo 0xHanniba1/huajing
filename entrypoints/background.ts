@@ -1,8 +1,8 @@
 import { onMessage, broadcastToTabs } from '../src/messaging/rpc';
 import { Msg } from '../src/messaging/types';
 import { handleTranslateBatch } from '../src/background/translate-router';
+import { handleLookupWord } from '../src/background/word-router';
 import { handleTestConnection, handleAddVocab, handleRemoveVocab, handleOpenOptions } from '../src/background/handlers';
-import { handleLookupWord } from '../src/background/lookup-router';
 import { onSettingsChanged } from '../src/store/storage';
 
 export default defineBackground(() => {
@@ -22,12 +22,5 @@ export default defineBackground(() => {
 
   onSettingsChanged((settings) => {
     broadcastToTabs({ type: 'settings-changed', settings }).catch(() => {});
-  });
-
-  chrome.commands.onCommand.addListener(async (cmd) => {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab?.id) return;
-    if (cmd === 'toggle-translate') chrome.tabs.sendMessage(tab.id, { type: 'cmd-toggle' }).catch(() => {});
-    else if (cmd === 'cycle-mode')   chrome.tabs.sendMessage(tab.id, { type: 'cmd-cycle-mode' }).catch(() => {});
   });
 });

@@ -11,8 +11,13 @@ describe('settings storage', () => {
   it('已写入时合并默认值（向前兼容新增字段）', async () => {
     await chrome.storage.local.set({ settings: { mode: 'replace' } });
     const s = await getSettings();
-    expect(s.mode).toBe('replace');
+    expect(s.mode).toBe(DEFAULT_SETTINGS.mode);
     expect(s.targetLang).toBe(DEFAULT_SETTINGS.targetLang);  // 新增字段回退默认
+  });
+  it('把旧的双语对照模式迁移为划词模式', async () => {
+    await chrome.storage.local.set({ settings: { mode: 'bilingual' } });
+    const s = await getSettings();
+    expect(s.mode).toBe('hover');
   });
   it('patchSettings 只写改动字段', async () => {
     await patchSettings({ mode: 'hover' });
@@ -23,8 +28,8 @@ describe('settings storage', () => {
   it('onSettingsChanged 回调触发', async () => {
     let fired: any = null;
     onSettingsChanged((s) => (fired = s));
-    await patchSettings({ mode: 'replace' });
-    expect(fired?.mode).toBe('replace');
+    await patchSettings({ mode: 'hover' });
+    expect(fired?.mode).toBe('hover');
   });
 });
 

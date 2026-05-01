@@ -1,10 +1,11 @@
 export type EngineId = 'deepseek' | 'openai' | 'anthropic' | 'gemini';
-export type Mode = 'bilingual' | 'replace' | 'hover';
+export type Mode = 'hover';
 export type TargetLang = 'zh-CN' | 'zh-TW' | 'ja' | 'en';
 export type Theme = 'light' | 'dark' | 'auto';
 export type Divider = 'solid' | 'dashed' | 'dotted' | 'bracket' | 'none';
 
 export type EngineConfig = { apiKey: string; baseURL: string; model: string };
+export type VocabDefinition = { pos?: string; text: string };
 
 export type Settings = {
   enabled: boolean;
@@ -23,6 +24,8 @@ export type VocabEntry = {
   word: string;
   addedAt: number;
   status: 'new' | 'learning' | 'mastered';
+  ipa?: string;
+  defs?: VocabDefinition[];
   context?: string;
   sourceURL?: string;
 };
@@ -36,7 +39,7 @@ export const ENGINE_PRESETS: Record<EngineId, { baseURL: string; defaultModel: s
 
 export const DEFAULT_SETTINGS: Settings = {
   enabled: true,
-  mode: 'bilingual',
+  mode: 'hover',
   targetLang: 'zh-CN',
   engine: 'deepseek',
   engineConfigs: Object.fromEntries(

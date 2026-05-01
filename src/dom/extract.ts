@@ -8,14 +8,17 @@ export type Paragraph = {
   hash: string;
 };
 
-const BLOCK_SELECTOR = 'p, li, h1, h2, h3, h4, h5, h6, blockquote, dt, dd, figcaption, td';
+const BLOCK_SELECTOR = 'p, li, h1, h2, h3, h4, h5, h6, blockquote, dt, dd, figcaption, td, div[data-testid="tweetText"]';
 const SKIP_ANCESTORS = new Set(['CODE', 'PRE', 'SCRIPT', 'STYLE', 'NOSCRIPT', 'KBD', 'SAMP', 'TEXTAREA']);
 
 let counter = 0;
 
 export function extractParagraphs(root: ParentNode = document.body): Paragraph[] {
   const out: Paragraph[] = [];
-  const els = root.querySelectorAll(BLOCK_SELECTOR);
+  const els = [
+    ...(root instanceof Element && root.matches(BLOCK_SELECTOR) ? [root] : []),
+    ...Array.from(root.querySelectorAll(BLOCK_SELECTOR)),
+  ];
   for (const el of els) {
     if ((el as HTMLElement).dataset?.hj) continue;
     if (hasSkipAncestor(el)) continue;
