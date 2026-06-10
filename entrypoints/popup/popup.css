@@ -252,7 +252,6 @@
 }
 .hj-foot-link { cursor: pointer; }
 .hj-foot-link:hover { color: var(--hj-accent); }
-.dot-sep { width: 3px; height: 3px; border-radius: 50%; background: var(--hj-faint); }
 
 body {
   margin: 0;

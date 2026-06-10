@@ -44,7 +44,7 @@ afterEach(() => {
 });
 
 describe('popup App', () => {
-  it('shows the v1.0.1 release version in the header', async () => {
+  it('shows the manifest version in the header', async () => {
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
@@ -53,7 +53,7 @@ describe('popup App', () => {
       root!.render(<App />);
     });
 
-    expect(container.querySelector('.hj-pop-name .v')?.textContent).toBe('v1.0.1');
+    expect(container.querySelector('.hj-pop-name .v')?.textContent).toBe('v0.0.0-test');
   });
 
   it('does not render keyboard shortcut hints', async () => {

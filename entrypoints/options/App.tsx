@@ -32,11 +32,6 @@ export function App() {
           <div className="hj-wb-title">生词本</div>
           <div className="hj-wb-sub">{list.length} 个词 · 已掌握 {masteredCount}</div>
         </div>
-        <div className="hj-wb-actions">
-          <button className="hj-btn-ghost-sm" type="button">导入</button>
-          <button className="hj-btn-ghost-sm" type="button">导出 CSV</button>
-          <button className="hj-btn-primary-sm" type="button">+ 手动添加</button>
-        </div>
       </header>
 
       <div className="hj-wb-toolbar">

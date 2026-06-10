@@ -4,8 +4,11 @@ import { resolve } from 'node:path';
 import config from './wxt.config';
 
 describe('extension manifest config', () => {
-  it('uses the 1.0.1 extension manifest version', () => {
-    expect((config as { manifest?: { version?: string } }).manifest?.version).toBe('1.0.1');
+  it('leaves manifest version to package.json as the single source', () => {
+    expect((config as { manifest?: { version?: string } }).manifest?.version).toBeUndefined();
+
+    const pkg = JSON.parse(readFileSync(resolve(process.cwd(), 'package.json'), 'utf8')) as { version?: string };
+    expect(pkg.version).toMatch(/^\d+\.\d+\.\d+$/);
   });
 
   it('does not register keyboard commands', () => {

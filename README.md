@@ -85,7 +85,7 @@ pnpm test
 pnpm test:run
 ```
 
-测试覆盖：引擎适配器、storage 门面、prompt 构造与解析、段落抓取、CJK 检测、fnv-1a、划词气泡、translate-router 缓存。
+测试覆盖：引擎适配器、storage 门面、prompt 构造与解析、fnv-1a、划词气泡、translate-router 缓存。
 
 ## Privacy
 
@@ -109,14 +109,12 @@ huajing/
 │  ├─ store/           # Settings + VocabEntry + chrome.storage 门面
 │  ├─ messaging/       # 类型化 RPC 契约
 │  ├─ engines/         # 4 个 BYOK 引擎适配器
-│  ├─ dom/             # 段落抓取 / 语种检测 / hash / MutationObserver
+│  ├─ dom/             # fnv-1a hash（翻译缓存键）
 │  ├─ modes/           # selection-based translation / lookup
-│  ├─ dict/            # ECDICT IndexedDB + LLM 兜底
+│  ├─ dict/            # DictEntry 类型定义
 │  ├─ ui/              # Shadow DOM 浮层组件 + 注入样式
-│  ├─ shared/          # 跨域工具
 │  ├─ background/      # SW 路由 + 翻译缓存 + lookup
 │  └─ content/         # content script coordinator
-├─ assets/             # 可选离线资源（不打包）
 └─ public/             # 静态资源
 ```
 

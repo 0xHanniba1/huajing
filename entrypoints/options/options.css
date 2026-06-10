@@ -50,29 +50,6 @@ body {
   color: var(--hj-muted);
   margin-top: 2px;
 }
-.hj-wb-actions {
-  display: inline-flex;
-  gap: 6px;
-}
-.hj-btn-ghost-sm,
-.hj-btn-primary-sm {
-  height: 28px;
-  padding: 0 12px;
-  border-radius: 7px;
-  font: 500 12.5px/1 -apple-system, BlinkMacSystemFont, "PingFang SC", system-ui, sans-serif;
-  cursor: pointer;
-  border: 1px solid var(--hj-line);
-  background: var(--hj-bg);
-  color: var(--hj-fg);
-}
-.hj-btn-ghost-sm:hover { background: var(--hj-card); }
-.hj-btn-primary-sm {
-  background: var(--hj-accent);
-  border-color: var(--hj-accent);
-  color: #fff;
-}
-.hj-btn-primary-sm:hover { transform: translateY(-1px); }
-
 .hj-wb-toolbar {
   display: flex;
   gap: 12px;

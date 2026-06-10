@@ -30,15 +30,9 @@ importers:
       '@wxt-dev/module-react':
         specifier: ^1.2.2
         version: 1.2.2(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0))(wxt@0.20.25(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0))
-      fake-indexeddb:
-        specifier: ^6.2.5
-        version: 6.2.5
       happy-dom:
         specifier: ^20.9.0
         version: 20.9.0
-      tsx:
-        specifier: ^4.21.0
-        version: 4.21.0
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -863,10 +857,6 @@ packages:
 
   exsolve@1.0.8:
     resolution: {integrity: sha512-LmDxfWXwcTArk8fUEnOfSZpHOJ6zOMUJKOtFLFqJLoKJetuQG874Uc7/Kki7zFLzYybmZhp1M7+98pfMqeX8yA==}
-
-  fake-indexeddb@6.2.5:
-    resolution: {integrity: sha512-CGnyrvbhPlWYMngksqrSSUT1BAVP49dZocrHuK0SvtR0D5TMs5wP0o3j7jexDJW01KSadjBp1M/71o/KR3nD1w==}
-    engines: {node: '>=18'}
 
   fast-redact@3.5.0:
     resolution: {integrity: sha512-dwsoQlS7h9hMeYUq1W++23NDcBLV4KqONnITDV9DjfS3q1SgDGVrBdvvTLUotWtPSD7asWDV9/CmsZPy8Hf70A==}
@@ -2585,8 +2575,6 @@ snapshots:
 
   exsolve@1.0.8: {}
 
-  fake-indexeddb@6.2.5: {}
-
   fast-redact@3.5.0: {}
 
   fdir@6.5.0(picomatch@4.0.4):
@@ -2634,6 +2622,7 @@ snapshots:
   get-tsconfig@4.14.0:
     dependencies:
       resolve-pkg-maps: 1.0.0
+    optional: true
 
   giget@3.2.0: {}
 
@@ -3159,7 +3148,8 @@ snapshots:
 
   require-directory@2.1.1: {}
 
-  resolve-pkg-maps@1.0.0: {}
+  resolve-pkg-maps@1.0.0:
+    optional: true
 
   restore-cursor@5.1.0:
     dependencies:
@@ -3334,6 +3324,7 @@ snapshots:
       get-tsconfig: 4.14.0
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   type-fest@3.13.1: {}
 

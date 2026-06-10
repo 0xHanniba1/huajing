@@ -1,5 +1,3 @@
-import 'fake-indexeddb/auto';
-
 // minimal chrome.* shim — individual tests can override per-key
 const storageData: Record<string, unknown> = {};
 (globalThis as any).chrome = {
@@ -36,6 +34,7 @@ const storageData: Record<string, unknown> = {};
     sendMessage: async () => undefined,
     onMessage: { addListener: () => {} },
     getURL: (p: string) => `chrome-extension://test/${p}`,
+    getManifest: () => ({ version: '0.0.0-test' }),
   },
 };
 const listeners: any[] = [];

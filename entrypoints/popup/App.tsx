@@ -21,7 +21,7 @@ export function App() {
         <span className="hj-logo">化</span>
         <span className="hj-pop-name">
           <span className="n">化境 Huàjìng</span>
-          <span className="v">v1.0.1</span>
+          <span className="v">v{chrome.runtime.getManifest().version}</span>
         </span>
         <div className="hj-pop-head-right">
           <span className="lbl-sm">深色模式</span>
@@ -116,8 +116,6 @@ export function App() {
       </div>
 
       <div className="hj-pop-foot">
-        <span className="hj-foot-link">设置</span>
-        <span className="dot-sep" />
         <span className="hj-foot-link" onClick={() => chrome.runtime.openOptionsPage()}>生词本 · {vocabCount}</span>
       </div>
     </div>
