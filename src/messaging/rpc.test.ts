@@ -20,4 +20,13 @@ describe('rpc send', () => {
     await expect(send({ type: 'test-connection', engineId: 'deepseek' }))
       .rejects.toThrow('扩展消息通道不可用');
   });
+
+  it('throws a clear error when Chrome invalidates the extension context', async () => {
+    chrome.runtime.sendMessage = vi.fn(async () => {
+      throw new Error('Extension context invalidated.');
+    });
+
+    await expect(send({ type: 'test-connection', engineId: 'deepseek' }))
+      .rejects.toThrow('扩展已重新加载，请刷新当前页面');
+  });
 });

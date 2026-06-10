@@ -26,6 +26,15 @@ function makeSettings(patch: Partial<Settings> = {}): Settings {
   };
 }
 
+function makeCtx(onInvalidate?: (fn: () => void) => void) {
+  return {
+    onInvalidated: vi.fn((fn: () => void) => {
+      onInvalidate?.(fn);
+      return vi.fn();
+    }),
+  };
+}
+
 afterEach(() => {
   vi.clearAllMocks();
 });
@@ -44,7 +53,7 @@ describe('content entrypoint', () => {
     }));
 
     const mod = await import('../../entrypoints/content');
-    await mod.default.main({} as never);
+    await mod.default.main(makeCtx() as never);
 
     expect(activateMock).toHaveBeenCalledWith(expect.objectContaining({ mode: 'hover' }), 'hover');
 
@@ -70,7 +79,7 @@ describe('content entrypoint', () => {
     getSettingsMock.mockResolvedValue(makeSettings({ enabled: true, mode: 'hover', autoSites: [] }));
 
     const mod = await import('../../entrypoints/content');
-    await mod.default.main({} as never);
+    await mod.default.main(makeCtx() as never);
     vi.clearAllMocks();
 
     listener?.({
@@ -95,7 +104,7 @@ describe('content entrypoint', () => {
     }));
 
     const mod = await import('../../entrypoints/content');
-    await mod.default.main({} as never);
+    await mod.default.main(makeCtx() as never);
     vi.clearAllMocks();
 
     listener?.({ type: 'cmd-toggle' });
@@ -104,5 +113,30 @@ describe('content entrypoint', () => {
     expect(deactivateMock).not.toHaveBeenCalled();
     expect(activateMock).not.toHaveBeenCalled();
     expect(patchSettingsMock).not.toHaveBeenCalled();
+  });
+
+  it('cleans up active content listeners when WXT invalidates the old script', async () => {
+    let messageListener: ((msg: any) => void) | undefined;
+    let invalidate: (() => void) | undefined;
+    const removeListenerMock = vi.fn();
+    (globalThis as any).defineContentScript = (definition: unknown) => definition;
+    chrome.runtime.onMessage.addListener = vi.fn((fn) => { messageListener = fn as (msg: any) => void; });
+    (chrome.runtime.onMessage as any).removeListener = removeListenerMock;
+    const ctx = {
+      onInvalidated: vi.fn((fn) => {
+        invalidate = fn;
+        return vi.fn();
+      }),
+    };
+
+    getSettingsMock.mockResolvedValue(makeSettings({ enabled: true, mode: 'hover', autoSites: [] }));
+
+    const mod = await import('../../entrypoints/content');
+    await mod.default.main(ctx as never);
+
+    invalidate?.();
+
+    expect(deactivateMock).toHaveBeenCalledTimes(1);
+    expect(removeListenerMock).toHaveBeenCalledWith(messageListener);
   });
 });

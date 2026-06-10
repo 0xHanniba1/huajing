@@ -5,7 +5,7 @@ import { Msg } from '../src/messaging/types';
 export default defineContentScript({
   matches: ['<all_urls>'],
   runAt: 'document_idle',
-  async main() {
+  async main(ctx) {
     let settings = await getSettings();
     let active = false;
 
@@ -36,11 +36,16 @@ export default defineContentScript({
 
     await reconcile();
 
-    chrome.runtime.onMessage.addListener((msg: Msg) => {
+    const onMessage = (msg: Msg) => {
       if (msg.type === 'settings-changed') {
         settings = msg.settings;
         reconcile().catch(() => {});
       }
+    };
+    chrome.runtime.onMessage.addListener(onMessage);
+    ctx.onInvalidated(() => {
+      stop();
+      chrome.runtime.onMessage.removeListener(onMessage);
     });
   },
 });
