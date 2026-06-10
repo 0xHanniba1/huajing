@@ -70,7 +70,15 @@ export function ApiConfigSection({ settings, patch }: { settings: Settings; patc
             <div className="hj-input-with-btn">
               <input className="hj-input" type={showKey ? 'text' : 'password'} placeholder={keyHint}
                 value={cur.apiKey} onChange={(e) => updateCur({ apiKey: e.target.value })} />
-              <button className="hj-icon-btn" onClick={() => setShowKey((v) => !v)}>{showKey ? '🙈' : '👁'}</button>
+              <button
+                className="hj-icon-btn"
+                type="button"
+                aria-label={showKey ? '隐藏 API Key' : '显示 API Key'}
+                title={showKey ? '隐藏 API Key' : '显示 API Key'}
+                onClick={() => setShowKey((v) => !v)}
+              >
+                <EyeIcon off={showKey} />
+              </button>
             </div>
           </Field>
           <Field label="Base URL" hint="代理或自托管时修改">
@@ -124,14 +132,24 @@ function Field({ label, hint, action, children }: { label: string; hint: React.R
   return (
     <div className="hj-field">
       <div className="hj-field-head">
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <span>{label}</span>
+        <span>{label}</span>
+        <span className="hj-field-side">
+          <span className="hj-field-hint">{hint}</span>
           {action}
         </span>
-        <span className="hj-field-hint">{hint}</span>
       </div>
       {children}
     </div>
+  );
+}
+
+function EyeIcon({ off }: { off: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M2.8 12c2.3-4.2 5.6-6.3 9.2-6.3s6.9 2.1 9.2 6.3c-2.3 4.2-5.6 6.3-9.2 6.3S5.1 16.2 2.8 12Z" />
+      <circle cx="12" cy="12" r="2.7" />
+      {off && <path d="M5 4.5 19 19.5" />}
+    </svg>
   );
 }
 

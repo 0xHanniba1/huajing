@@ -40,14 +40,14 @@
 
 .hj-pop-head {
   display: flex; align-items: center; gap: 12px;
-  padding: 14px 16px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--hj-line);
 }
 
 .hj-logo {
-  width: 34px; height: 34px; border-radius: 8px;
+  width: 30px; height: 30px; border-radius: 8px;
   background: linear-gradient(135deg, #2b6cb0, #4f8fd6);
-  color: #fff; font-weight: 700; font-size: 16px;
+  color: #fff; font-weight: 700; font-size: 15px;
   display: inline-flex; align-items: center; justify-content: center;
   box-shadow: 0 4px 10px -2px rgba(43,108,176,0.35);
   flex-shrink: 0;
@@ -59,27 +59,19 @@
 
 .hj-pop-head-right {
   margin-left: auto;
-  display: inline-flex; align-items: center; gap: 8px;
+  display: inline-flex; align-items: center; gap: 12px;
   flex-shrink: 0;
 }
 .hj-pop-head-right .lbl-sm { font-size: 11.5px; color: var(--hj-muted); white-space: nowrap; }
+.hj-head-switch { display: inline-flex; align-items: center; gap: 5px; }
 
-.hj-pop-power,
 .hj-tiny-toggle {
   position: relative; border: 0; padding: 0; cursor: pointer;
   border-radius: 999px; background: #c7c9cc;
+  width: 30px; height: 18px; flex-shrink: 0;
 }
-.hj-pop-power { width: 36px; height: 21px; flex-shrink: 0; }
-.hj-pop-power[data-on="1"] { background: #34c759; }
-.hj-pop-power i {
-  position: absolute; top: 2px; left: 2px;
-  width: 17px; height: 17px; border-radius: 50%;
-  background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25);
-  transition: transform .14s;
-}
-.hj-pop-power[data-on="1"] i { transform: translateX(15px); }
-.hj-tiny-toggle { width: 30px; height: 18px; flex-shrink: 0; }
 .hj-tiny-toggle[data-on="1"] { background: var(--hj-accent); }
+.hj-tiny-toggle.hj-power[data-on="1"] { background: #34c759; }
 .hj-tiny-toggle i {
   position: absolute; top: 2px; left: 2px;
   width: 14px; height: 14px; border-radius: 50%;
@@ -89,19 +81,19 @@
 .hj-tiny-toggle[data-on="1"] i { transform: translateX(12px); }
 
 .hj-pop-section {
-  padding: 12px 16px;
+  padding: 8px 16px;
   border-bottom: 1px solid var(--hj-line);
 }
 .hj-pop-section:last-child { border-bottom: 0; }
 .hj-pop-section-title {
   font-size: 11px; letter-spacing: 0.14em;
   color: var(--hj-muted); text-transform: uppercase;
-  font-weight: 600; margin-bottom: 10px;
+  font-weight: 600; margin-bottom: 6px;
 }
 
 .hj-row {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 0; gap: 12px;
+  padding: 4px 0; gap: 12px;
 }
 .hj-row + .hj-row { border-top: 1px solid var(--hj-line); }
 .hj-row .lbl { display: block; font-size: 13px; color: var(--hj-fg); }
@@ -112,7 +104,7 @@
 
 .hj-pop-select {
   appearance: none;
-  padding: 6px 28px 6px 12px;
+  padding: 4px 28px 4px 12px;
   border: 1px solid var(--hj-line); border-radius: 8px;
   background: var(--hj-bg); color: var(--hj-fg);
   font: inherit; font-size: 13px; cursor: pointer;
@@ -128,7 +120,7 @@
 .hj-collapse-head {
   display: flex; align-items: center; justify-content: space-between;
   cursor: pointer;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 .hj-status-tag {
   font-size: 10.5px; letter-spacing: 0; text-transform: none; font-weight: 500;
@@ -138,19 +130,23 @@
 .hj-chev { color: var(--hj-muted); font-size: 12px; transition: transform .15s; }
 .hj-chev.open { transform: rotate(180deg); }
 
-.hj-api-body { display: flex; flex-direction: column; gap: 12px; }
+.hj-api-body { display: flex; flex-direction: column; gap: 8px; }
 
-.hj-field { display: flex; flex-direction: column; gap: 6px; }
+.hj-field { display: flex; flex-direction: column; gap: 4px; }
 .hj-field-head {
   display: flex; align-items: center; justify-content: space-between;
   gap: 10px;
   font-size: 12.5px; font-weight: 500;
 }
-.hj-field-hint { font-size: 11px; color: var(--hj-muted); font-weight: 400; white-space: nowrap; }
+.hj-field-side { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.hj-field-hint {
+  font-size: 11px; color: var(--hj-muted); font-weight: 400;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 .hj-input,
 .hj-pop-input {
-  height: 32px; padding: 0 10px;
+  height: 28px; padding: 0 10px;
   border: 1px solid var(--hj-line); border-radius: 7px;
   background: var(--hj-bg); color: var(--hj-fg);
   font: 12px/1 ui-monospace, "SF Mono", Menlo, monospace;
@@ -166,29 +162,34 @@
 
 .hj-input-with-btn { display: flex; gap: 6px; }
 .hj-icon-btn {
-  width: 32px; height: 32px;
+  width: 28px; height: 28px;
   border: 1px solid var(--hj-line); border-radius: 7px;
   background: var(--hj-bg); color: var(--hj-muted); cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
-  flex-shrink: 0; font-size: 13px;
+  flex-shrink: 0;
 }
-.hj-icon-btn:hover { background: var(--hj-card); }
+.hj-icon-btn:hover { background: var(--hj-card); color: var(--hj-fg); }
+.hj-icon-btn svg {
+  width: 16px; height: 16px;
+  fill: none; stroke: currentColor;
+  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
 
 .hj-link-btn,
 .hj-model-query-btn {
-  border: 1px solid color-mix(in srgb, var(--hj-accent) 35%, var(--hj-line));
-  background: var(--hj-accent-soft); color: var(--hj-accent);
-  padding: 2px 8px; border-radius: 5px; cursor: pointer;
-  font: 500 11.5px inherit;
+  border: 0; background: none; color: var(--hj-accent);
+  padding: 0; cursor: pointer;
+  font: 500 11px inherit;
+  white-space: nowrap; flex-shrink: 0;
 }
 .hj-link-btn:hover,
-.hj-model-query-btn:hover { background: color-mix(in srgb, var(--hj-accent) 18%, var(--hj-bg)); }
+.hj-model-query-btn:hover { text-decoration: underline; }
 .hj-link-btn:disabled,
-.hj-model-query-btn:disabled { opacity: .5; cursor: default; }
+.hj-model-query-btn:disabled { opacity: .45; cursor: default; text-decoration: none; }
 
-.hj-api-actions { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+.hj-api-actions { display: flex; align-items: center; gap: 12px; margin-top: 2px; }
 .hj-btn-primary {
-  height: 32px; padding: 0 16px;
+  height: 28px; padding: 0 16px;
   border: 0; border-radius: 7px;
   background: var(--hj-accent); color: #fff;
   font: 500 12.5px inherit; cursor: pointer;
@@ -247,7 +248,7 @@
 
 .hj-pop-foot {
   display: flex; align-items: center; gap: 10px;
-  padding: 12px 16px;
+  padding: 8px 16px;
   font-size: 12px; color: var(--hj-muted);
 }
 .hj-foot-link { cursor: pointer; }

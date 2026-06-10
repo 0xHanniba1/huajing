@@ -24,26 +24,32 @@ export function App() {
           <span className="v">v{chrome.runtime.getManifest().version}</span>
         </span>
         <div className="hj-pop-head-right">
-          <span className="lbl-sm">深色模式</span>
-          <button
-            className="hj-tiny-toggle"
-            type="button"
-            aria-label="深色模式"
-            title="深色模式"
-            data-on={settings.theme === 'dark' ? 1 : 0}
-            onClick={() => patch({ theme: (settings.theme === 'dark' ? 'light' : 'dark') as Theme })}
-          >
-            <i />
-          </button>
-          <button
-            className="hj-pop-power"
-            type="button"
-            aria-label={settings.enabled ? '关闭插件' : '开启插件'}
-            data-on={settings.enabled ? 1 : 0}
-            onClick={() => patch({ enabled: !settings.enabled })}
-          >
-            <i />
-          </button>
+          <span className="hj-head-switch">
+            <span className="lbl-sm">深色模式</span>
+            <button
+              className="hj-tiny-toggle"
+              type="button"
+              aria-label="深色模式"
+              title="深色模式"
+              data-on={settings.theme === 'dark' ? 1 : 0}
+              onClick={() => patch({ theme: (settings.theme === 'dark' ? 'light' : 'dark') as Theme })}
+            >
+              <i />
+            </button>
+          </span>
+          <span className="hj-head-switch">
+            <span className="lbl-sm">启用</span>
+            <button
+              className="hj-tiny-toggle hj-power"
+              type="button"
+              aria-label={settings.enabled ? '关闭插件' : '开启插件'}
+              title={settings.enabled ? '关闭插件' : '开启插件'}
+              data-on={settings.enabled ? 1 : 0}
+              onClick={() => patch({ enabled: !settings.enabled })}
+            >
+              <i />
+            </button>
+          </span>
         </div>
       </div>
 
