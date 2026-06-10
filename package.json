@@ -1,6 +1,6 @@
 {
   "name": "huajing",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Chrome MV3 translation extension with BYOK LLM providers, selection translation, and vocabulary notes.",
   "type": "module",
   "main": "index.js",

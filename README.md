@@ -13,7 +13,7 @@ Chrome MV3 翻译扩展。支持划词查词、划词翻译、朗读、生词本
 不需要执行 `pnpm`，也不需要安装 Git、Node.js 或任何开发工具。
 
 1. 打开 [Releases](https://github.com/0xHanniba1/huajing/releases)
-2. 下载最新版里的 `huajing-chrome-mv3.zip`
+2. 下载最新版里的 `huajing-x.y.z-chrome.zip`（如 `huajing-1.0.2-chrome.zip`）
 3. 解压这个 zip，得到一个包含 `manifest.json` 的文件夹
 4. 打开 Chrome，进入 `chrome://extensions/`
 5. 开启右上角“开发者模式”
