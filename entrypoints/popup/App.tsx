@@ -58,7 +58,7 @@ export function App() {
             <select className="hj-pop-select" value={settings.engine} onChange={(e) => patch({ engine: e.target.value as EngineId })}>
               <option value="deepseek">DeepSeek</option>
               <option value="openai">OpenAI</option>
-              <option value="anthropic">Claude Sonnet</option>
+              <option value="anthropic">Anthropic</option>
               <option value="gemini">Gemini</option>
             </select>
           </span>
