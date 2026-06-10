@@ -28,7 +28,8 @@ export async function handleTranslateBatch(args: { texts: string[]; targetLang: 
     });
     todo.forEach(({ idx, text }, j) => {
       out[idx] = trans[j] || '';
-      cache.set(key(text, targetLang), out[idx]);
+      // 空槽位多半是解析失败，缓存会让后续重试永远拿到空串
+      if (out[idx]) cache.set(key(text, targetLang), out[idx]);
     });
   }
   return { translations: out };

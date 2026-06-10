@@ -26,8 +26,12 @@ export function ApiConfigSection({ settings, patch }: { settings: Settings; patc
   async function testConnection() {
     if (!cur.apiKey) return;
     setTested('testing');
-    const r = await send({ type: 'test-connection', engineId: settings.engine });
-    setTested(r.ok ? 'ok' : 'fail');
+    try {
+      const r = await send({ type: 'test-connection', engineId: settings.engine });
+      setTested(r.ok ? 'ok' : 'fail');
+    } catch {
+      setTested('fail');
+    }
   }
 
   async function queryModels() {

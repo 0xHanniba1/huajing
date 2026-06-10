@@ -40,7 +40,8 @@ async function completeAnthropic(prompt: string, opts: Parameters<Engine['transl
     },
     body: JSON.stringify({
       model: opts.config.model,
-      max_tokens: 1024,
+      // 2000 字符选区译成 CJK 可能超过 1024 token，留足余量避免截断
+      max_tokens: 4096,
       messages: [{ role: 'user', content: prompt }],
     }),
     signal: opts.signal,

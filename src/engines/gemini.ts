@@ -12,7 +12,7 @@ export const geminiEngine: Engine = {
     return completeGemini(prompt, opts);
   },
   async ping(opts) {
-    const url = `${opts.config.baseURL}/models/${opts.config.model}:generateContent?key=${opts.config.apiKey}`;
+    const url = geminiGenerateUrl(opts.config.baseURL, opts.config.model, opts.config.apiKey);
     const r = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -26,8 +26,12 @@ export const geminiEngine: Engine = {
   },
 };
 
+function geminiGenerateUrl(baseURL: string, model: string, apiKey: string): string {
+  return `${baseURL}/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+}
+
 async function completeGemini(prompt: string, opts: Parameters<Engine['translateBatch']>[1]): Promise<string> {
-  const url = `${opts.config.baseURL}/models/${opts.config.model}:generateContent?key=${opts.config.apiKey}`;
+  const url = geminiGenerateUrl(opts.config.baseURL, opts.config.model, opts.config.apiKey);
   const r = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

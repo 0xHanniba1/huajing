@@ -2,6 +2,7 @@ import React, { act } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, Settings } from '../../src/store/types';
+import { send } from '../../src/messaging/rpc';
 import { ApiConfigSection } from './ApiConfigSection';
 
 vi.mock('../../src/messaging/rpc', () => ({
@@ -115,6 +116,35 @@ describe('ApiConfigSection', () => {
         deepseek: { ...settings.engineConfigs.deepseek, model: 'deepseek-v3.1' },
       },
     });
+  });
+
+  it('marks the connection test as failed when send rejects', async () => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+    const settings: Settings = {
+      ...DEFAULT_SETTINGS,
+      engineConfigs: {
+        ...DEFAULT_SETTINGS.engineConfigs,
+        deepseek: { ...DEFAULT_SETTINGS.engineConfigs.deepseek, apiKey: 'sk-test' },
+      },
+    };
+    vi.mocked(send).mockRejectedValueOnce(new Error('扩展已重新加载，请刷新当前页面'));
+
+    await act(async () => {
+      root!.render(<ApiConfigSection settings={settings} patch={vi.fn()} />);
+    });
+
+    const testButton = [...container.querySelectorAll('button')]
+      .find((button) => button.textContent === '测试连接');
+    expect(testButton).toBeTruthy();
+
+    await act(async () => {
+      testButton!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(container.querySelector('.hj-status-tag')!.textContent).toContain('连接失败');
+    expect((testButton as HTMLButtonElement).disabled).toBe(false);
   });
 
   it('uses the v2 API configuration structure from the design file', async () => {
